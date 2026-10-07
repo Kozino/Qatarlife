@@ -5,8 +5,17 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# Client-side routing for the browser/PWA shell. API and WebSocket traffic use
-# the absolute Render URL configured in VITE_API_BASE_URL and VITE_WS_URL.
+# Proxy API calls through Netlify so the browser treats the session cookie as
+# first-party (fixes Safari / iOS / Incognito third-party cookie blocking).
+# To use it, leave VITE_API_BASE_URL EMPTY in Netlify env vars and redeploy.
+# WebSockets cannot go through this proxy: keep VITE_WS_URL pointing at Render.
+[[redirects]]
+  from = "/api/*"
+  to = "https://qatarlife.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# Client-side routing for the browser/PWA shell.
 [[redirects]]
   from = "/*"
   to = "/index.html"
