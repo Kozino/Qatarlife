@@ -3,13 +3,16 @@ services:
     name: qatar-life-api
     runtime: node
     plan: starter
-    buildCommand: npm ci && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run db:migrate && npm start
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
+      # The build and start commands require TypeScript/Vite tooling.
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_SSL

@@ -25,6 +25,7 @@ npm run dev
 - API: Express on port `8787`
 - If `DATABASE_URL` is absent, the app uses a clearly labelled in-memory preview store.
 - If PostgreSQL is configured, run `npm run db:migrate` before starting the API.
+- `.npmrc` keeps the TypeScript/Vite tooling available when a host sets `NODE_ENV=production` during installation.
 - There are intentionally no seed files. With `WORLD_BOOTSTRAP=true`, the Render API idempotently provisions static catalog/configuration rows from typed application definitions after migrations. Player data is never overwritten.
 
 ## Commands

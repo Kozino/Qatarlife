@@ -31,8 +31,10 @@ Migrations create the schema, including the idempotency and access-integrity har
 Create the service from `render.yaml`, or configure manually:
 
 - Runtime: Node
-- Build: `npm ci && npm run build`
+- Build: `npm ci --include=dev && npm run build`
 - Start: `npm run db:migrate && npm start`
+
+The repository includes `.npmrc` with `include=dev` because the build needs TypeScript/Vite type tooling and the current Render start command uses `tsx`. If configuring Render manually, use the explicit `--include=dev` flag rather than a production-only `npm install`.
 - Health: `/api/health`
 - Bind address: `0.0.0.0` through the application
 
@@ -65,7 +67,7 @@ VITE_WS_URL=wss://<your-render-service>.onrender.com/ws/world
 Build settings are already in `netlify.toml`:
 
 ```text
-Build command: npm ci && npm run build
+Build command: npm ci --include=dev && npm run build
 Publish directory: dist
 ```
 
