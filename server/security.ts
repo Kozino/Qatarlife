@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto'
-import type { NextFunction, Request, Response } from 'express'
+import type { CookieOptions, NextFunction, Request, Response } from 'express'
 import { config, type AppRole } from './config'
 import type { AccountStore } from './db'
 
@@ -21,23 +21,45 @@ export function hashOpaqueToken(token: string) {
   return createHash('sha256').update(token).digest('hex')
 }
 
-export function setSessionCookie(res: Response, rawToken: string) {
-  res.cookie(sessionCookieName, rawToken, {
+/**
+ * Decide cookie attributes per request.
+ *
+ * A browser silently DROPS a cookie that is:
+ *   - SameSite=Lax/Strict but set by a different site than the page (Netlify -> Render), or
+ *   - SameSite=None without Secure.
+ * That makes login "work" (response body has the user) while every later request is 401.
+ *
+ * So we treat the request as cross-site when the config says so, when running in production,
+ * or when the browser's Origin host differs from the API host. Cross-site => SameSite=None + Secure.
+ * Requires `app.set('trust proxy', 1)` so req.secure is correct behind Render's proxy.
+ */
+function cookieOptions(res: Response): CookieOptions {
+  const req = res.req
+  const origin = typeof req?.headers?.origin === 'string' ? req.headers.origin : ''
+  let originDiffers = false
+  if (origin) {
+    try {
+      originDiffers = new URL(origin).host !== req.headers.host
+    } catch {
+      originDiffers = false
+    }
+  }
+  const crossSite = Boolean(config.crossSiteCookies) || Boolean(config.isProduction) || originDiffers
+  const secure = crossSite || Boolean(config.secureCookies) || Boolean(req?.secure)
+  return {
     httpOnly: true,
-    sameSite: config.crossSiteCookies ? 'none' : 'lax',
-    secure: config.secureCookies,
-    maxAge: sessionMaxAgeMs,
+    sameSite: crossSite ? 'none' : 'lax',
+    secure,
     path: '/',
-  })
+  }
+}
+
+export function setSessionCookie(res: Response, rawToken: string) {
+  res.cookie(sessionCookieName, rawToken, { ...cookieOptions(res), maxAge: sessionMaxAgeMs })
 }
 
 export function clearSessionCookie(res: Response) {
-  res.clearCookie(sessionCookieName, {
-    httpOnly: true,
-    sameSite: config.crossSiteCookies ? 'none' : 'lax',
-    secure: config.secureCookies,
-    path: '/',
-  })
+  res.clearCookie(sessionCookieName, cookieOptions(res))
 }
 
 export function getRawSessionToken(req: Request) {
