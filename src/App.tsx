@@ -94,10 +94,7 @@ export default function App() {
   if (user && !user.profile.onboardingComplete) return <Onboarding user={user} onComplete={setUser} />
   if (user) return <LifeHub user={user} onLogout={() => setUser(null)} onUserUpdated={setUser} />
 
-  return <>
-    <LandingPage onStart={() => setAuthOpen(true)} bootError={bootError} />
-    <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} onSuccess={(nextUser) => { setAuthOpen(false); setUser(nextUser) }} />
-  </>
+  return <LandingPage onStart={() => setAuthOpen(true)} bootError={bootError} />
 }
 
 function LoadingScreen() {

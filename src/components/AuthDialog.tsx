@@ -67,8 +67,7 @@ export function AuthDialog({ open, initialMode = 'signup', onClose, onSuccess }:
         setMessage(result.message)
         return
       }
-      const cleanEmail = email.trim().toLowerCase()
-      const result = mode === 'signup' ? await api.signup(cleanEmail, password) : await api.login(cleanEmail, password)
+      const result = mode === 'signup' ? await api.signup(email, password) : await api.login(email, password)
       onSuccess(result.user)
     } catch (caught) {
       const typed = caught as Error & { fields?: Record<string, string> }
@@ -79,9 +78,7 @@ export function AuthDialog({ open, initialMode = 'signup', onClose, onSuccess }:
     }
   }
 
-  // FIX: login mode must also show the password field.
-  const isPasswordMode = mode === 'signup' || mode === 'login' || mode === 'reset-confirm'
-  const showChecklist = mode === 'signup' || mode === 'reset-confirm'
+  const isPasswordMode = mode === 'signup' || mode === 'reset-confirm'
   const title = mode === 'signup' ? 'Make a life of it.' : mode === 'login' ? 'Welcome back, storyteller.' : mode === 'reset-request' ? 'Find your way back.' : 'Choose a new password.'
   const intro = mode === 'signup' ? 'Create a free player account and start with 5,000 Virtual QAR.' : mode === 'login' ? 'Your city is waiting exactly where you left it.' : mode === 'reset-request' ? 'Enter your email and we will send a secure reset link.' : 'Your reset link is ready. Set a password you will remember.'
 
@@ -98,8 +95,8 @@ export function AuthDialog({ open, initialMode = 'signup', onClose, onSuccess }:
 
         {(mode === 'signup' || mode === 'login') && (
           <div className="auth-tabs" role="tablist" aria-label="Account action">
-            <button className={mode === 'signup' ? 'is-active' : ''} onClick={() => { setMode('signup'); setError(''); setMessage(''); setFieldErrors({}) }} type="button" role="tab" aria-selected={mode === 'signup'}>Create account</button>
-            <button className={mode === 'login' ? 'is-active' : ''} onClick={() => { setMode('login'); setError(''); setMessage(''); setFieldErrors({}) }} type="button" role="tab" aria-selected={mode === 'login'}>Sign in</button>
+            <button className={mode === 'signup' ? 'is-active' : ''} onClick={() => { setMode('signup'); setError(''); setMessage('') }} type="button" role="tab" aria-selected={mode === 'signup'}>Create account</button>
+            <button className={mode === 'login' ? 'is-active' : ''} onClick={() => { setMode('login'); setError(''); setMessage('') }} type="button" role="tab" aria-selected={mode === 'login'}>Sign in</button>
           </div>
         )}
 
@@ -120,24 +117,13 @@ export function AuthDialog({ open, initialMode = 'signup', onClose, onSuccess }:
 
           {isPasswordMode && (
             <>
-              <div className="field-label-row"><label className="field-label" htmlFor="auth-password">Password</label><span className="field-hint">{mode === 'login' ? 'Your password' : 'Secure password'}</span></div>
+              <div className="field-label-row"><label className="field-label" htmlFor="auth-password">Password</label><span className="field-hint">Secure password</span></div>
               <div className="password-wrap">
-                <input
-                  id="auth-password"
-                  className={`text-input ${fieldErrors.password ? 'has-error' : ''}`}
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  placeholder={mode === 'signup' ? 'At least 8 characters' : mode === 'login' ? 'Your password' : 'Your new password'}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                />
+                <input id="auth-password" className={`text-input ${fieldErrors.password ? 'has-error' : ''}`} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'signup' ? 'new-password' : 'new-password'} placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your new password'} value={password} onChange={(event) => setPassword(event.target.value)} required />
                 <button className="password-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button>
               </div>
               {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
-              {showChecklist && (
-                <div className="password-checks" aria-label="Password requirements">{passwordChecks.map((check) => <span key={check.label} className={check.ok ? 'is-met' : ''}><Check size={13} /> {check.label}</span>)}</div>
-              )}
+              <div className="password-checks" aria-label="Password requirements">{passwordChecks.map((check) => <span key={check.label} className={check.ok ? 'is-met' : ''}><Check size={13} /> {check.label}</span>)}</div>
             </>
           )}
 
