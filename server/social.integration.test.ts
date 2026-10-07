@@ -30,6 +30,10 @@ describe('Phase 4–7 social, commerce and operations systems', () => {
     const guest = await createPlayer('Event Guest')
     await store.setAdminRole(host.userId, 'admin')
 
+    const catalogEvents = await guest.agent.get('/api/events')
+    expect(catalogEvents.status).toBe(200)
+    expect(catalogEvents.body.events.some((item: { title: string }) => item.title === 'Lantern Souq Evening')).toBe(true)
+
     const event = await host.agent.post('/api/admin/events').send({
       title: 'Fictional evening gathering', description: 'A small community event inside the simulation.', eventType: 'community', locationId: 'doha-gateway',
       startAt: new Date(Date.now() + 60_000).toISOString(), endAt: new Date(Date.now() + 3_600_000).toISOString(), capacity: 10, rewards: [{ type: 'xp', amount: 20 }],

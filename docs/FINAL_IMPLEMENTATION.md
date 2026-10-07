@@ -4,7 +4,7 @@
 
 The product keeps a thin React/Vite PWA client, a Node/Express REST and authenticated WebSocket service, and PostgreSQL as the authority for identity, world state, progression, Virtual QAR and social records. Store interfaces keep the in-memory preview path available without making it a production mode. Netlify talks to Render through credentialed HTTPS and WSS; Render talks to Supabase PostgreSQL.
 
-Static world and catalog data is defined in typed TypeScript and applied by `server/bootstrap.ts` only when `WORLD_BOOTSTRAP=true`. The bootstrap uses slug-based upserts, is safe to repeat, and does not reset player balances, inventory, ownership, social records or mutable product stock. No seed files or seed commands are used.
+Static world and catalog data is defined in typed TypeScript and applied by `server/bootstrap.ts` only when `WORLD_BOOTSTRAP=true`. The bootstrap uses slug-based upserts, is safe to repeat, and does not reset player balances, inventory, ownership, social records or mutable product stock. Recurring fictional events use a stable catalog key so bootstrap can refresh their schedule without touching registrations; player-created events keep that key empty. No seed files or seed commands are used.
 
 ## Delivered phases
 
@@ -25,6 +25,7 @@ Static world and catalog data is defined in typed TypeScript and applied by `ser
 - `database/schema.sql` is the current full snapshot.
 - `database/migrations/0001`–`0004` establish identity, world and life/social tables.
 - `database/migrations/0005_idempotency_and_integrity.sql` adds actor-scoped idempotency indexes, the business-order idempotency key, access-path indexes and the wallet reference constraint for already-provisioned PostgreSQL/Supabase databases.
+- `database/migrations/0006_catalog_events.sql` adds the stable catalog key used by recurring Qatar-inspired gatherings.
 - The ledger remains append-only through the database trigger. Balance-changing commands lock the wallet projection and write the ledger in the same transaction; purchase/activity response metadata is inserted with the ledger row rather than updated afterward. Business and marketplace transfers lock both wallets in deterministic order.
 - Passport progress is computed from durable onboarding, movement, work, housing, activity, friendship and ledger records, with typed achievement targets rather than fabricated UI counters.
 

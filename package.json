@@ -2,7 +2,7 @@
   "name": "qatar-life",
   "private": true,
   "version": "0.1.0",
-  "description": "Qatar Life \u2014 a fictional social virtual-life world inspired by Qatar.",
+  "description": "Qatar Life — a fictional social virtual-life world inspired by Qatar.",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
@@ -26,6 +26,7 @@
     "pg": "^8.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "three": "^0.170.0",
     "ws": "^8.22.0",
     "zod": "^3.24.1"
   },
@@ -39,6 +40,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@types/supertest": "^7.2.1",
+    "@types/three": "^0.186.0",
     "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",

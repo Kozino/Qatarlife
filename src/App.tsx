@@ -78,6 +78,7 @@ function styleLabel(style: UserBundle['character']['presentation']) {
 export default function App() {
   const [user, setUser] = useState<UserBundle | null>(null)
   const [authOpen, setAuthOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup')
   const [booting, setBooting] = useState(true)
   const [bootError, setBootError] = useState('')
 
@@ -94,14 +95,17 @@ export default function App() {
   if (user && !user.profile.onboardingComplete) return <Onboarding user={user} onComplete={setUser} />
   if (user) return <LifeHub user={user} onLogout={() => setUser(null)} onUserUpdated={setUser} />
 
-  return <LandingPage onStart={() => setAuthOpen(true)} bootError={bootError} />
+  return <>
+    <LandingPage onStart={(mode = 'signup') => { setAuthMode(mode); setAuthOpen(true) }} bootError={bootError} />
+    <AuthDialog initialMode={authMode} open={authOpen} onClose={() => setAuthOpen(false)} onSuccess={(nextUser) => { setAuthOpen(false); setUser(nextUser) }} />
+  </>
 }
 
 function LoadingScreen() {
   return <div className="app-loading"><div className="loading-mark">QL</div><span>Opening Qatar Life…</span></div>
 }
 
-function LandingPage({ onStart, bootError }: { onStart: () => void; bootError: string }) {
+function LandingPage({ onStart, bootError }: { onStart: (mode?: 'signup' | 'login') => void; bootError: string }) {
   const [selectedRegion, setSelectedRegion] = useState<RegionSlug>('doha')
   const selected = regionOptions.find((region) => region.id === selectedRegion)!
 
@@ -117,7 +121,7 @@ function LandingPage({ onStart, bootError }: { onStart: () => void; bootError: s
           <button onClick={() => scrollTo('how-it-works')} type="button">How it works</button>
           <button onClick={() => scrollTo('principles')} type="button">Our promise</button>
         </nav>
-        <div className="header-actions"><button className="quiet-button desktop-only" type="button" onClick={onStart}>Sign in</button><button className="small-primary-button" type="button" onClick={onStart}>Start your life <ArrowRight size={15} /></button><button className="mobile-menu-button" aria-label="Open navigation" type="button" onClick={() => scrollTo('world-preview')}><Menu size={19} /></button></div>
+        <div className="header-actions"><button className="quiet-button desktop-only" type="button" onClick={() => onStart('login')}>Sign in</button><button className="small-primary-button" type="button" onClick={() => onStart('signup')}>Start your life <ArrowRight size={15} /></button><button className="mobile-menu-button" aria-label="Open navigation" type="button" onClick={() => scrollTo('world-preview')}><Menu size={19} /></button></div>
       </header>
 
       <main>
@@ -126,7 +130,7 @@ function LandingPage({ onStart, bootError }: { onStart: () => void; bootError: s
             <div className="eyebrow eyebrow-with-rule"><span /> A social world, made for your story</div>
             <h1>Live your<br /><em>Qatar story.</em></h1>
             <p className="hero-lede">Explore. Work. Connect. Build your life in a fictional Qatar-inspired world that keeps getting more alive with every chapter.</p>
-            <div className="hero-actions"><button className="primary-button hero-primary" type="button" onClick={onStart}>Start your life <ArrowRight size={18} /></button><button className="outline-button" type="button" onClick={() => scrollTo('world-preview')}><Map size={17} /> Explore Qatar</button></div>
+            <div className="hero-actions"><button className="primary-button hero-primary" type="button" onClick={() => onStart('signup')}>Start your life <ArrowRight size={18} /></button><button className="outline-button" type="button" onClick={() => scrollTo('world-preview')}><Map size={17} /> Explore Qatar</button></div>
             <div className="hero-proof"><div className="proof-avatars"><span className="proof-avatar proof-avatar-one">SA</span><span className="proof-avatar proof-avatar-two">MR</span><span className="proof-avatar proof-avatar-three">LN</span><span className="proof-avatar proof-avatar-four">+</span></div><span>Build a life at your own pace.<br /><strong>Every story starts somewhere.</strong></span></div>
           </div>
           <div className="hero-art" aria-label="Original stylized preview of the Qatar Life world">
@@ -145,14 +149,14 @@ function LandingPage({ onStart, bootError }: { onStart: () => void; bootError: s
 
         <section className="world-section shell-width" id="world-preview">
           <div className="section-heading split-heading"><div><span className="eyebrow">A world in chapters</span><h2>Start close to home.<br /><em>Go wherever the story takes you.</em></h2></div><p>Four regions. Dozens of places to discover. A world that feels familiar enough to find your way around, and open enough to make it your own.</p></div>
-          <div className="world-preview-grid"><WorldMap selectedRegion={selectedRegion} onSelect={setSelectedRegion} /><div className="region-detail-card"><div className="region-detail-head"><span className="eyebrow">Selected region</span><span className="region-index">0{regionOptions.findIndex((region) => region.id === selectedRegion) + 1} / 04</span></div><div className="region-detail-title"><h3>{selected.name}</h3><span className="region-status"><span className="status-dot" /> Open to explore</span></div><p>{selected.description}</p><div className="region-detail-rule" /><div className="region-places"><span className="eyebrow">Places you could find</span><div className="place-pills">{previewLocations.filter((location) => location.region === selectedRegion).map((location) => <span key={location.label}><i className={`place-dot ${location.tone}`} /> {location.label}</span>)}{previewLocations.filter((location) => location.region === selectedRegion).length === 0 && <span><i className="place-dot green" /> Open roads & new discoveries</span>}</div></div><button className="text-button map-cta" type="button" onClick={onStart}>Choose your first district <ArrowRight size={15} /></button></div></div>
+          <div className="world-preview-grid"><WorldMap selectedRegion={selectedRegion} onSelect={setSelectedRegion} /><div className="region-detail-card"><div className="region-detail-head"><span className="eyebrow">Selected region</span><span className="region-index">0{regionOptions.findIndex((region) => region.id === selectedRegion) + 1} / 04</span></div><div className="region-detail-title"><h3>{selected.name}</h3><span className="region-status"><span className="status-dot" /> Open to explore</span></div><p>{selected.description}</p><div className="region-detail-rule" /><div className="region-places"><span className="eyebrow">Places you could find</span><div className="place-pills">{previewLocations.filter((location) => location.region === selectedRegion).map((location) => <span key={location.label}><i className={`place-dot ${location.tone}`} /> {location.label}</span>)}{previewLocations.filter((location) => location.region === selectedRegion).length === 0 && <span><i className="place-dot green" /> Open roads & new discoveries</span>}</div></div><button className="text-button map-cta" type="button" onClick={() => onStart('signup')}>Choose your first district <ArrowRight size={15} /></button></div></div>
         </section>
 
-        <section className="life-section" id="principles"><div className="shell-width life-layout"><div className="life-intro"><span className="eyebrow">Your first 30 seconds</span><h2>It starts small.<br /><em>Then it becomes yours.</em></h2><p>Qatar Life is designed around the tiny choices that make a virtual world feel personal: where you wake up, who you meet, and what you decide to do next.</p><button className="outline-button on-dark" type="button" onClick={onStart}>Begin your chapter <ArrowRight size={16} /></button></div><div className="life-steps">{lifeSteps.map((step) => <article className="life-step" key={step.number}><span className="step-number">{step.number}</span><div><h3>{step.title}</h3><p>{step.body}</p></div><ChevronRight size={17} /></article>)}</div></div></section>
+        <section className="life-section" id="principles"><div className="shell-width life-layout"><div className="life-intro"><span className="eyebrow">Your first 30 seconds</span><h2>It starts small.<br /><em>Then it becomes yours.</em></h2><p>Qatar Life is designed around the tiny choices that make a virtual world feel personal: where you wake up, who you meet, and what you decide to do next.</p><button className="outline-button on-dark" type="button" onClick={() => onStart('signup')}>Begin your chapter <ArrowRight size={16} /></button></div><div className="life-steps">{lifeSteps.map((step) => <article className="life-step" key={step.number}><span className="step-number">{step.number}</span><div><h3>{step.title}</h3><p>{step.body}</p></div><ChevronRight size={17} /></article>)}</div></div></section>
 
         <section className="promise-section shell-width"><div className="promise-card"><div className="promise-ornament"><ShieldCheck size={20} /></div><div><span className="eyebrow">A clear promise</span><h2>Fictional by design.<br /><em>Respectful by default.</em></h2><p>Qatar Life is a fictional social simulation inspired by the region’s energy and variety. Virtual QAR, homes, jobs and businesses exist only inside the game and have no real-world monetary value. We use original maps, characters and assets.</p></div><div className="promise-tags"><span><Check size={14} /> No official affiliation</span><span><Check size={14} /> Original world & assets</span><span><Check size={14} /> Privacy-aware social play</span></div></div></section>
 
-        <section className="final-cta shell-width"><div className="final-cta-stars"><Star size={15} /><Star size={10} /><Star size={13} /></div><span className="eyebrow eyebrow-light">Your story is not a template</span><h2>There is no right way<br />to live your Qatar story.</h2><button className="primary-button" type="button" onClick={onStart}>Start your life <ArrowRight size={17} /></button><span className="cta-note">Free to begin · Fictional world · Virtual QAR included</span></section>
+        <section className="final-cta shell-width"><div className="final-cta-stars"><Star size={15} /><Star size={10} /><Star size={13} /></div><span className="eyebrow eyebrow-light">Your story is not a template</span><h2>There is no right way<br />to live your Qatar story.</h2><button className="primary-button" type="button" onClick={() => onStart('signup')}>Start your life <ArrowRight size={17} /></button><span className="cta-note">Free to begin · Fictional world · Virtual QAR included</span></section>
       </main>
 
       <footer className="public-footer shell-width"><Brand compact /><span>© 2026 Qatar Life. An original fictional social world.</span><span className="footer-right">Built for curious people <Sparkles size={13} /></span></footer>

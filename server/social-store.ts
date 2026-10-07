@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto'
 import { Pool, type PoolClient } from 'pg'
 import type { AccountStore } from './db'
 import { config } from './config'
+import { EVENT_CATALOG } from './life-catalog'
+import { WORLD_LOCATIONS } from './world-catalog'
 import { creditLedger, debitLedger, lockWallets, LifeRuleError, type LifeStore } from './life-store'
 import type { AdvertisementOption, BusinessOption, ChatMessage, EventOption, FriendOption, MarketplaceListing } from './life-types'
 
@@ -66,7 +68,31 @@ export class MemorySocialStore implements SocialStore {
   private readonly notifications = new Map<string, Array<{ id: string; kind: string; title: string; body: string; readAt: string | null; createdAt: string }>>()
   private readonly analytics: Array<{ userId: string | null; eventName: string; createdAt: number }> = []
 
-  constructor(private readonly accounts: AccountStore, private readonly economy: LifeStore) {}
+  constructor(private readonly accounts: AccountStore, private readonly economy: LifeStore) {
+    const now = Date.now()
+    for (const catalogEvent of EVENT_CATALOG) {
+      const startAt = new Date(now + catalogEvent.startOffsetMinutes * 60_000)
+      const endAt = new Date(startAt.getTime() + catalogEvent.durationMinutes * 60_000)
+      const location = WORLD_LOCATIONS.find((candidate) => candidate.slug === catalogEvent.locationSlug)
+      const event: MemoryEvent = {
+        id: `catalog:${catalogEvent.slug}`,
+        title: catalogEvent.title,
+        description: catalogEvent.description,
+        eventType: catalogEvent.eventType,
+        locationId: location?.id ?? catalogEvent.locationSlug,
+        locationName: location?.name ?? catalogEvent.locationSlug,
+        startAt: startAt.toISOString(),
+        endAt: endAt.toISOString(),
+        capacity: catalogEvent.capacity,
+        registeredCount: 0,
+        attendeeStatus: null,
+        rewards: catalogEvent.rewards,
+        status: 'published',
+        attendees: new Map(),
+      }
+      this.events.set(event.id, event)
+    }
+  }
 
   private async userName(userId: string) {
     const user = await this.accounts.getBundleByUserId(userId)

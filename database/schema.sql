@@ -513,6 +513,7 @@ CREATE INDEX IF NOT EXISTS business_order_items_order_idx ON business_order_item
 
 CREATE TABLE IF NOT EXISTS events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  catalog_key text,
   title text NOT NULL,
   description text NOT NULL DEFAULT '',
   event_type text NOT NULL,
@@ -525,6 +526,7 @@ CREATE TABLE IF NOT EXISTS events (
   created_by uuid REFERENCES users(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT events_catalog_key_unique UNIQUE (catalog_key),
   CHECK(end_at > start_at)
 );
 

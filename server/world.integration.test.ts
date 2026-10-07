@@ -30,7 +30,7 @@ describe('Phase 2 world HTTP and realtime behavior', () => {
     const catalog = await player.agent.get('/api/world/locations')
     expect(catalog.status).toBe(200)
     expect(catalog.body.locations.length).toBeGreaterThanOrEqual(20)
-    expect(new Set(catalog.body.locations.map((location: { district: string }) => location.district))).toEqual(new Set(['Doha', 'Souq district', 'Corniche', 'Msheireb', 'West Bay', 'Katara', 'The Pearl', 'Lusail', 'Desert', 'Beach']))
+    expect(new Set(catalog.body.locations.map((location: { district: string }) => location.district))).toEqual(new Set(['Doha', 'Souq district', 'Corniche', 'Msheireb', 'West Bay', 'Katara', 'The Pearl', 'Lusail', 'Desert', 'Beach', 'Education City', 'Aspire Park', 'Wakrah harbour', 'Al Khor mangroves', 'Sealine dunes']))
 
     const initial = await player.agent.get('/api/world/state')
     expect(initial.status).toBe(200)

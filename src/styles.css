@@ -225,3 +225,35 @@ h1 em, h2 em { color: var(--sand-800); font-style: normal; }
   .top-status { display: none; }
   .life-top-actions .icon-button { padding: 6px; }
 }
+
+/* Original Qatar Life low-poly world */
+.three-world-shell { position: relative; height: clamp(440px, 48vw, 620px); min-height: 430px; overflow: hidden; isolation: isolate; background: #9bbdc0; }
+.three-world-shell::before { position: absolute; z-index: -1; inset: 0; pointer-events: none; content: ''; background: linear-gradient(165deg, rgba(241,225,188,.45), transparent 42%), radial-gradient(circle at 18% 90%, rgba(119,79,77,.28), transparent 25%); }
+.three-world-canvas { display: block; width: 100%; height: 100%; outline: none; cursor: grab; touch-action: none; }
+.three-world-canvas:active { cursor: grabbing; }
+.three-world-badge { position: absolute; z-index: 2; top: 16px; left: 17px; display: inline-flex; align-items: center; gap: 9px; max-width: calc(100% - 34px); padding: 8px 11px 8px 8px; border: 1px solid rgba(255,247,224,.42); border-radius: 11px; color: #fff1d1; background: rgba(47,13,32,.48); box-shadow: 0 7px 18px rgba(47,13,32,.12); backdrop-filter: blur(10px); pointer-events: none; }
+.three-world-badge strong, .three-world-badge small { display: block; }
+.three-world-badge strong { font-family: 'Manrope', sans-serif; font-size: 10px; letter-spacing: -.02em; }
+.three-world-badge small { margin-top: 2px; color: rgba(255,244,219,.72); font-family: 'DM Mono', monospace; font-size: 7px; }
+.three-world-orb { display: block; width: 20px; height: 20px; border: 2px solid #f4d38d; border-radius: 50%; background: radial-gradient(circle at 34% 30%, #ffedbf 0 12%, #b35c70 14% 50%, #51203f 52%); box-shadow: 0 0 0 3px rgba(244,211,141,.14); }
+.three-world-legend { position: absolute; z-index: 2; right: 17px; bottom: 15px; display: flex; align-items: center; gap: 9px; padding: 7px 9px; border: 1px solid rgba(255,247,224,.3); border-radius: 9px; color: rgba(255,244,219,.82); background: rgba(47,13,32,.42); font-family: 'DM Mono', monospace; font-size: 7px; pointer-events: none; }
+.three-world-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.three-world-legend i { display: inline-block; width: 7px; height: 7px; border: 1px solid rgba(255,255,255,.72); border-radius: 50%; }
+.legend-you { background: #7c294f; }
+.legend-place { background: #f4d38d; }
+.legend-player { background: #4d7f92; }
+@media (max-width: 760px) {
+  .three-world-shell { height: 470px; min-height: 420px; }
+  .three-world-badge { top: 12px; left: 12px; }
+  .three-world-legend { right: 12px; bottom: 12px; }
+}
+@media (max-width: 420px) {
+  .three-world-shell { height: 410px; min-height: 390px; }
+  .three-world-badge small { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .three-world-legend { gap: 6px; padding: 6px 7px; font-size: 6px; }
+}
+.three-world-webgl-fallback { position: absolute; z-index: 3; top: 50%; left: 50%; display: flex; width: min(360px, calc(100% - 36px)); flex-direction: column; gap: 8px; padding: 18px; border: 1px solid rgba(255,247,224,.5); border-radius: 13px; color: #fff1d1; background: rgba(47,13,32,.84); box-shadow: 0 12px 28px rgba(47,13,32,.2); font-size: 11px; text-align: center; transform: translate(-50%, -50%); }
+.three-world-webgl-fallback span { color: rgba(255,244,219,.75); font-size: 9px; line-height: 1.5; }
+.three-world-accessible-list { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.three-world-accessible-list button { border: 0; color: inherit; background: transparent; font: inherit; }
+.three-world-accessible-list button:focus { position: fixed; z-index: 20; top: 12px; left: 12px; width: min(360px, calc(100vw - 24px)); height: auto; overflow: visible; padding: 10px; border: 2px solid var(--sand-600); border-radius: 8px; color: var(--maroon-950); background: var(--cream); white-space: normal; }

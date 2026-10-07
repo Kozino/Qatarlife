@@ -1,7 +1,7 @@
 import { Pool } from 'pg'
 import { config } from './config'
 import { logger } from './logger'
-import { ACTIVITY_CATALOG, ACHIEVEMENT_CATALOG, CATALOG_REGIONS, HOME_CATALOG, ITEM_CATALOG, JOB_CATALOG, SHOP_CATALOG } from './life-catalog'
+import { ACTIVITY_CATALOG, ACHIEVEMENT_CATALOG, CATALOG_REGIONS, EVENT_CATALOG, HOME_CATALOG, ITEM_CATALOG, JOB_CATALOG, SHOP_CATALOG } from './life-catalog'
 import { WORLD_DISTRICTS, WORLD_LOCATIONS } from './world-catalog'
 
 /**
@@ -159,6 +159,20 @@ export async function bootstrapRuntimeCatalog(connectionString = config.database
       )
     }
 
+    for (const event of EVENT_CATALOG) {
+      const startAt = new Date(Date.now() + event.startOffsetMinutes * 60_000)
+      const endAt = new Date(startAt.getTime() + event.durationMinutes * 60_000)
+      await client.query(
+        `INSERT INTO events (catalog_key, title, description, event_type, location_id, start_at, end_at, capacity, rewards, status, created_by)
+         VALUES ($1, $2, $3, $4, (SELECT id FROM locations WHERE slug = $5), $6, $7, $8, $9::jsonb, 'published', NULL)
+         ON CONFLICT (catalog_key) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description,
+           event_type = EXCLUDED.event_type, location_id = EXCLUDED.location_id, start_at = EXCLUDED.start_at,
+           end_at = EXCLUDED.end_at, capacity = EXCLUDED.capacity, rewards = EXCLUDED.rewards,
+           status = 'published', updated_at = now()`,
+        [event.slug, event.title, event.description, event.eventType, event.locationSlug, startAt.toISOString(), endAt.toISOString(), event.capacity, JSON.stringify(event.rewards)],
+      )
+    }
+
     for (const achievement of ACHIEVEMENT_CATALOG) {
       await client.query(
         `INSERT INTO achievements (slug, title, description, category, icon_key, requirement, reward, is_active)
@@ -171,7 +185,7 @@ export async function bootstrapRuntimeCatalog(connectionString = config.database
     }
 
     await client.query('COMMIT')
-    const summary = { regions: CATALOG_REGIONS.length, districts: WORLD_DISTRICTS.length, locations: WORLD_LOCATIONS.length, jobs: JOB_CATALOG.length, items: ITEM_CATALOG.length, homes: HOME_CATALOG.length, activities: ACTIVITY_CATALOG.length }
+    const summary = { regions: CATALOG_REGIONS.length, districts: WORLD_DISTRICTS.length, locations: WORLD_LOCATIONS.length, jobs: JOB_CATALOG.length, items: ITEM_CATALOG.length, homes: HOME_CATALOG.length, activities: ACTIVITY_CATALOG.length, events: EVENT_CATALOG.length }
     logger.info('runtime_catalog_bootstrapped', summary)
     return { skipped: false as const, ...summary }
   } catch (error) {
